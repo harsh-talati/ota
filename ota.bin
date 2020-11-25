@@ -1,0 +1,59 @@
+#include "driver/gpio.h"
+#include "esp_system.h"
+#include "esp_log.h"
+
+#include "esp_https_ota.h"
+#include "esp_http_client.h"
+#include "ota.h"
+
+#define VERSION 1
+#define json_url "http://tekitnow.com/espota/ota.bin"
+
+extern const char server_cert_pem_start[] asm("_binary_certs_pem_start");
+extern const char server_cert_pem_end[] asm("_binary_certs_pem_end");
+const int led = 14;
+
+
+
+
+void blink(){
+  digitalWrite(led, HIGH);
+  Serial.println("Blinking LED");
+  delay(100);
+}
+
+esp_err_t do_firmware_upgrade()
+{
+  Serial.println("Checking for firmware...");
+  esp_http_client_config_t config = {
+    .url = json_url,
+    .cert_pem = server_cert_pem_start,    
+  };
+  Serial.println("Downloading firmware...");
+  esp_err_t ret = esp_https_ota(&config);
+  if(ret = ESP_OK) {
+    esp_restart();
+  } else{
+    return ESP_FAIL;
+  }
+  Serial.println("downloaded !");
+  return ESP_OK;
+}
+
+void setup() {
+  // put your setup code here, to run once:
+pinMode(led, OUTPUT);
+Serial.begin(115200);
+blink();
+do_firmware_upgrade();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+//Serial.println("Trying to Connect to wifi");
+//wifi_connect();
+
+
+
+
+}
